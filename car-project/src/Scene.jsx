@@ -23,9 +23,9 @@ export function Scene() {
   return (
     <>
       <Suspense fallback={null}>
-        <Environment files="./assets/textures/envmap.hdr" background blur={0.5} />
+        <Environment files="./assets/textures/clouds_anime_6k.jpg" background blur={0.5} />
 
-        <PerspectiveCamera makeDefault position={cameraPosition} fov={40} />
+        <PerspectiveCamera makeDefault position={cameraPosition} fov={80} />
         {!thirdPerson && (
             <OrbitControls target={[-2.64, -0.71, 0.03]} />
         )}
@@ -33,6 +33,21 @@ export function Scene() {
         <Track />
         <Kart thirdPerson={thirdPerson} />
       </Suspense>
+      <directionalLight
+        castShadow
+        color={"#f3d29a"}
+        intensity={2}
+        position={[10, 5, 4]}
+        shadow-bias={-0.0005}
+        shadow-mapSize-width={1024}
+        shadow-mapSize-height={1024}
+        shadow-camera-near={0.01}
+        shadow-camera-far={20}
+        shadow-camera-top={6}
+        shadow-camera-bottom={-6}
+        shadow-camera-left={-6.2}
+        shadow-camera-right={6.4}
+      />
     </>
   )
 }

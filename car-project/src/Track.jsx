@@ -118,7 +118,7 @@ export function Track(props) {
             <ColliderBox position={[1, 1, 12.5]} scale={[30, 30, 1]} />
 
             {/* inner */}
-            <ColliderBox position={[-0.45, 1.75, 1.15]} scale={[14, 30, 1]} />
+            <ColliderBox position={[-0.25, 1.75, -1.25]} scale={[14, 30, 1.8]} />
     </group>
     </>
   );
