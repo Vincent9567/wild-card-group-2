@@ -7,19 +7,20 @@ Source: https://sketchfab.com/3d-models/cartoonish-go-kart-cb5b6546a26d48cd8c803
 Title: Cartoonish Go-Kart
 */
 
-import { useEffect, useRef } from 'react'
-import { useGLTF } from '@react-three/drei'
-import { useFrame } from '@react-three/fiber'
+import { useEffect, useRef } from "react";
+import { useGLTF } from "@react-three/drei";
+import { useFrame } from "@react-three/fiber";
 import { useBox, useRaycastVehicle } from "@react-three/cannon";
-import { Quaternion, Vector3 } from "three"
-import { useWheels } from './useWheels';
-import { useControls } from './useControls';
-import { WheelDebug } from './WheelDebug';
+import { Quaternion, Vector3 } from "three";
+import { useWheels } from "./useWheels";
+import { useControls } from "./useControls";
+import { WheelDebug } from "./WheelDebug";
+import { RigidBody } from "@react-three/rapier";
 
-export function Kart({props, thirdPerson}) {
-  const { nodes, materials } = useGLTF('assets/models/kart.glb')
+export function Kart({ props, thirdPerson }) {
+  const { nodes, materials } = useGLTF("assets/models/kart.glb");
 
-  const position = [9.5, 0.5, 3]
+  const position = [9, 0.5, 2.5];
   const width = 0.55;
   const height = 0.05;
   const front = 0.15;
@@ -32,8 +33,10 @@ export function Kart({props, thirdPerson}) {
       args: chassisBodyArgs,
       mass: 150,
       position,
+      collisionFilterGroup: 4,
+      collisionFilterMask: [2, 1],
     }),
-    useRef(null),
+    useRef(null)
   );
 
   const [wheels, wheelInfos] = useWheels(width, height, front, wheelRadius);
@@ -44,57 +47,70 @@ export function Kart({props, thirdPerson}) {
       wheelInfos,
       wheels,
     }),
-    useRef(null),
+    useRef(null)
   );
 
   useControls(vehicleApi, chassisApi);
 
   useFrame((state) => {
-    if(!thirdPerson) return;
+    if (!thirdPerson) return;
 
-    let position = new Vector3(0,0,0);
+    let position = new Vector3(0, 0, 0);
     position.setFromMatrixPosition(chassisBody.current.matrixWorld);
 
     let quaternion = new Quaternion(0, 0, 0, 0);
     quaternion.setFromRotationMatrix(chassisBody.current.matrixWorld);
 
-    let wDir = new Vector3(0,0,1);
+    let wDir = new Vector3(0, 0, 1);
     wDir.applyQuaternion(quaternion);
     wDir.normalize();
 
-    let cameraPosition = position.clone().add(wDir.clone().multiplyScalar(1).add(new Vector3(0, 0.3, 0)));
-    
+    let cameraPosition = position
+      .clone()
+      .add(wDir.clone().multiplyScalar(1).add(new Vector3(0, 0.3, 0)));
+
     wDir.add(new Vector3(0, 0.2, 0));
     state.camera.position.copy(cameraPosition);
     state.camera.lookAt(position);
-
-  })
+  });
 
   const groupRef = useRef();
-  
+
   return (
     <>
-    <group ref={vehicle} name="vehicle">
+      <group ref={vehicle} name="vehicle">
         <group ref={chassisBody}>
-            <group {...props} dispose={null} scale={0.20} rotation-y={Math.PI}>
-                <group rotation={[-Math.PI / 2, 0, 0]}>
-                    <mesh geometry={nodes.Object_2.geometry} material={materials.initialShadingGroup} />
-                    <mesh geometry={nodes.Object_3.geometry} material={materials.blinn1SG} material-color="blue" />
-                    <mesh geometry={nodes.Object_4.geometry} material={materials.blinn1SG} />
-                    <mesh geometry={nodes.Object_5.geometry} material={materials.lambert2SG} material-color="red" />
-                </group>
+          <group {...props} dispose={null} scale={0.2} rotation-y={Math.PI}>
+            <group rotation={[-Math.PI / 2, 0, 0]}>
+              <mesh
+                geometry={nodes.Object_2.geometry}
+                material={materials.initialShadingGroup}
+              />
+              <mesh
+                geometry={nodes.Object_3.geometry}
+                material={materials.blinn1SG}
+                material-color="blue"
+              />
+              <mesh
+                geometry={nodes.Object_4.geometry}
+                material={materials.blinn1SG}
+              />
+
+              <mesh
+                geometry={nodes.Object_5.geometry}
+                material={materials.lambert2SG}
+                material-color="red"
+              />
             </group>
+          </group>
         </group>
         <WheelDebug wheelRef={wheels[0]} radius={wheelRadius} />
         <WheelDebug wheelRef={wheels[1]} radius={wheelRadius} />
         <WheelDebug wheelRef={wheels[2]} radius={wheelRadius} />
         <WheelDebug wheelRef={wheels[3]} radius={wheelRadius} />
-    </group>
-    
+      </group>
     </>
-  )
+  );
 }
 
-useGLTF.preload('assets/models/kart.glb');
-
-
+useGLTF.preload("assets/models/kart.glb");
